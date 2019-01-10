@@ -153,7 +153,7 @@ class GifList extends StatelessWidget {
           gif[index].thumnailImage,
           width: 150,
           height: 150,
-          fit: BoxFit.cover,
+          fit: BoxFit.fill,
 
         );
       },
