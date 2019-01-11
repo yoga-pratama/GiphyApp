@@ -32,19 +32,19 @@ class MyApp extends StatelessWidget {
 
 Future<List<GiphyJSON>> fetchGif(http.Client client) async {
   final response = await client.get(
-      'https://api.giphy.com/v1/gifs/trending?api_key=fztKWf4stguXu9hkFujkKRSov4uyyi65&limit=25&rating=G');
+      'https://api.giphy.com/v1/gifs/trending?api_key=YOUR_KEY&limit=25&rating=G');
   return compute(parseGif, response.body);
 }
 
 Future<List<GiphyJSON>> fetchStickerTrending(http.Client client) async {
   final response = await client.get(
-      'https://api.giphy.com/v1/stickers/trending?api_key=fztKWf4stguXu9hkFujkKRSov4uyyi65&limit=25&rating=G');
+      'https://api.giphy.com/v1/stickers/trending?api_key=YOUR_KEY&limit=25&rating=G');
   return compute(parseGif, response.body);
 }
 
 Future<List<GiphyJSON>> fetchsearch(searchKey) async {
   final response = await http.get(
-      'https://api.giphy.com/v1/gifs/search?api_key=fztKWf4stguXu9hkFujkKRSov4uyyi65&q=$searchKey&limit=25&offset=0&rating=G&lang=en');
+      'https://api.giphy.com/v1/gifs/search?api_key=YOUR_KEY&q=$searchKey&limit=25&offset=0&rating=G&lang=en');
   if (response.statusCode == 200) {
     return parseGif(response.body);
   } else {
