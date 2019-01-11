@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 void main() => runApp(MyApp());
 
@@ -149,13 +150,23 @@ class GifList extends StatelessWidget {
           crossAxisCount: 2, crossAxisSpacing: 5, mainAxisSpacing: 5),
       itemCount: gif.length,
       itemBuilder: (context, index) {
-        return Image.network(
+       /* return Image.network(
           gif[index].thumnailImage,
           width: 150,
           height: 150,
           fit: BoxFit.fill,
 
-        );
+        ); */
+        return CachedNetworkImage(
+          imageUrl: gif[index].thumnailImage,
+          placeholder: new Center(
+            child: new CircularProgressIndicator(),
+          ),
+          errorWidget: new Icon(Icons.error),
+          height: 150,
+          width: 150,
+          fit: BoxFit.fill,
+          );
       },
     );
   }
