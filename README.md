@@ -1,16 +1,17 @@
 # giphy_app
 
-A new Flutter project.
+Flutter based App fetching Giphy Data Using Giphy API, in this app you can see an example of some widget like TabBarView,Searchview. Im also using Future with compute function to fetch data on background .
+For more information on flutter you can see https://flutter.io/docs/
 
-## Getting Started
+# Sample View
 
-This project is a starting point for a Flutter application.
+![alt text](https://github.com/yoga-pratama/GiphyApp/blob/master/GiphyApp1.gif) ![alt text](https://github.com/yoga-pratama/GiphyApp/blob/master/GiphyApp2.gif) ![alt text](https://github.com/yoga-pratama/GiphyApp/blob/master/GiphyApp3.gif)
 
-A few resources to get you started if this is your first Flutter project:
+# Requirement
 
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
+For this app to run it need : 
+- Giphy API Key you can register at https://developers.giphy.com
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+Using dart plugin :
+-http: ^0.12.0+1
+-cached_network_image: ^0.5.1
