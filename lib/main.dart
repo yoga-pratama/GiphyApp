@@ -64,15 +64,16 @@ class GiphyJSON {
   final String id;
   final String title;
   final String thumnailImage;
+  final String source;
 
-  GiphyJSON({this.id, this.title, this.thumnailImage});
+  GiphyJSON({this.id, this.title, this.thumnailImage, this.source});
 
   factory GiphyJSON.fromJson(Map<String, dynamic> json) {
     return GiphyJSON(
-      id: json['id'],
-      title: json['title'],
-      thumnailImage: json['images']['original']['url'],
-    );
+        id: json['id'],
+        title: json['title'],
+        thumnailImage: json['images']['original']['url'],
+        source: json['source_tld']);
   }
 }
 
@@ -178,9 +179,52 @@ class GifList extends StatelessWidget {
           ),
           onTap: () {
             print('index sekarang $index');
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => detailPage(GifData: gif[index])));
           },
         );
       },
+    );
+  }
+}
+
+class detailPage extends StatelessWidget {
+  final GiphyJSON GifData;
+
+  detailPage({Key key, this.GifData}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(GifData.title),
+      ),
+      body: Container(
+       
+        child: Card(
+          child: Column(
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.album),
+                title: Text(GifData.title),
+                subtitle: Text(GifData.source),
+              ),
+              CachedNetworkImage(
+                imageUrl: GifData.thumnailImage,
+                placeholder: new Center(
+                  child: new CircularProgressIndicator(),
+                ),
+                errorWidget: new Icon(Icons.error),
+                //  height: 150,
+                //  width: 200,
+                fit: BoxFit.fill,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
