@@ -13,5 +13,5 @@ For this app to run it need :
 - Giphy API Key you can register at https://developers.giphy.com
 
 Using dart plugin :
--http: ^0.12.0+1
--cached_network_image: ^0.5.1
+- http: ^0.12.0+1
+- cached_network_image: ^0.5.1
