@@ -7,12 +7,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 void main() => runApp(MyApp());
 
-enum tab{
-  trending,
-  random,
-}
-
-
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -42,13 +36,21 @@ Future<List<GiphyJSON>> fetchGif(http.Client client) async {
   return compute(parseGif, response.body);
 }
 
-
 Future<List<GiphyJSON>> fetchStickerTrending(http.Client client) async {
   final response = await client.get(
       'https://api.giphy.com/v1/stickers/trending?api_key=fztKWf4stguXu9hkFujkKRSov4uyyi65&limit=25&rating=G');
   return compute(parseGif, response.body);
 }
 
+Future<List<GiphyJSON>> fetchsearch(searchKey) async {
+  final response = await http.get(
+      'https://api.giphy.com/v1/gifs/search?api_key=fztKWf4stguXu9hkFujkKRSov4uyyi65&q=$searchKey&limit=25&offset=0&rating=G&lang=en');
+  if (response.statusCode == 200) {
+    return parseGif(response.body);
+  } else {
+    throw Exception('Failed to load post');
+  }
+}
 
 List<GiphyJSON> parseGif(String responseBody) {
   //final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
@@ -69,19 +71,19 @@ class GiphyJSON {
     return GiphyJSON(
       id: json['id'],
       title: json['title'],
-      thumnailImage:  json['images']['original']['url'],
+      thumnailImage: json['images']['original']['url'],
     );
   }
 }
 
 class mainPage extends StatelessWidget {
   final String title;
-
+  final _SearchDelegate _delegate = _SearchDelegate();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   mainPage({Key key, this.title}) : super(key: key);
 
   Widget fetchtrending() {
-    
     return FutureBuilder<List<GiphyJSON>>(
       future: fetchGif(http.Client()),
       builder: (context, snapshot) {
@@ -96,7 +98,7 @@ class mainPage extends StatelessWidget {
     );
   }
 
-  Widget fetchSticker(){
+  Widget fetchSticker() {
     return FutureBuilder<List<GiphyJSON>>(
       future: fetchStickerTrending(http.Client()),
       builder: (context, snapshot) {
@@ -111,8 +113,6 @@ class mainPage extends StatelessWidget {
     );
   }
 
- 
-  
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -120,19 +120,26 @@ class mainPage extends StatelessWidget {
         child: Scaffold(
           appBar: AppBar(
             title: Text(title),
+            actions: <Widget>[
+              IconButton(
+                tooltip: 'Search',
+                icon: Icon(Icons.search),
+                onPressed: () async {
+                  final String selected = await showSearch<String>(
+                      context: context, delegate: _delegate);
+                },
+              )
+            ],
             bottom: TabBar(
-             // controller: tabControl,
+              // controller: tabControl,
               tabs: <Widget>[
                 Tab(text: 'Gif'),
                 Tab(text: 'Sticker'),
               ],
             ),
           ),
-          body:  TabBarView(
-            children: <Widget>[
-              fetchtrending(),
-              fetchSticker()
-            ],
+          body: TabBarView(
+            children: <Widget>[fetchtrending(), fetchSticker()],
           ),
         ));
   }
@@ -140,8 +147,9 @@ class mainPage extends StatelessWidget {
 
 class GifList extends StatelessWidget {
   final List<GiphyJSON> gif;
+  final bool isDetail;
 
-  GifList({Key key, this.gif}) : super(key: key);
+  GifList({Key key, this.gif, this.isDetail}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -150,23 +158,115 @@ class GifList extends StatelessWidget {
           crossAxisCount: 2, crossAxisSpacing: 5, mainAxisSpacing: 5),
       itemCount: gif.length,
       itemBuilder: (context, index) {
-       /* return Image.network(
+        /* return Image.network(
           gif[index].thumnailImage,
           width: 150,
           height: 150,
           fit: BoxFit.fill,
 
         ); */
-        return CachedNetworkImage(
-          imageUrl: gif[index].thumnailImage,
-          placeholder: new Center(
-            child: new CircularProgressIndicator(),
+        return GestureDetector(
+          child: CachedNetworkImage(
+            imageUrl: gif[index].thumnailImage,
+            placeholder: new Center(
+              child: new CircularProgressIndicator(),
+            ),
+            errorWidget: new Icon(Icons.error),
+            height: 150,
+            width: 150,
+            fit: BoxFit.fill,
           ),
-          errorWidget: new Icon(Icons.error),
-          height: 150,
-          width: 150,
-          fit: BoxFit.fill,
-          );
+          onTap: () {
+            print('index sekarang $index');
+          },
+        );
+      },
+    );
+  }
+}
+
+class _SearchDelegate extends SearchDelegate<String> {
+  List<String> _suggestions = <String>['Cat'];
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return <Widget>[
+      IconButton(
+        tooltip: 'Clear',
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      )
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    // TODO: implement buildLeading
+    return IconButton(
+      tooltip: 'Back',
+      icon: AnimatedIcon(
+        icon: AnimatedIcons.menu_arrow,
+        progress: transitionAnimation,
+      ),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    if (query == null || query == '') {
+      return Container(
+        padding: new EdgeInsets.only(top: 16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                  text: 'Search gif...', style: theme.textTheme.subhead),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Container(
+          padding: new EdgeInsets.only(top: 16.0), child: searchGif());
+    }
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Container(
+      padding: new EdgeInsets.only(top: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          RichText(
+            textAlign: TextAlign.center,
+            text:
+                TextSpan(text: 'Search gif...', style: theme.textTheme.subhead),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget searchGif() {
+    return FutureBuilder<List<GiphyJSON>>(
+      future: fetchsearch(query),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) print(snapshot.error);
+        return snapshot.hasData
+            ? GifList(
+                gif: snapshot.data,
+              )
+            : Center(child: CircularProgressIndicator());
       },
     );
   }
